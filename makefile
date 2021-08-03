@@ -38,7 +38,7 @@ kind-services:
 	kustomize build zarf/k8s/kind/sales-pod | kubectl apply -f -
 
 kind-logs:
-	kubectl logs -l app=sales --all-containers=true -f --tail=100 | go run app/logfmt/main.go
+	kubectl logs -l app=sales --all-containers=true -f --tail=100
 
 kind-status:
 	kubectl get nodes -o wide
