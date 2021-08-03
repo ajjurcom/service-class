@@ -1,34 +1,22 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
 
-	"go.uber.org/automaxprocs/maxprocs"
+	"github.com/ardanlabs/service/foundation/logger"
 )
 
+// build is the git version of this program. It is set using build flags in the makefile.
 var build = "develop"
 
 func main() {
-	log.Println("starting service", build)
 
-	// Make sure the program is using the correct
-	// number of threads if a CPU quota is set.
-	if _, err := maxprocs.Set(); err != nil {
-		log.Println(err)
+	// Construct the application logger.
+	log, err := logger.New("SALES-API")
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	n := runtime.NumCPU()
-	g := runtime.GOMAXPROCS(0)
-	log.Println("NumCPU", n, "GOMAX", g)
-
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-	<-shutdown
-
-	log.Println("stoping service")
+	defer log.Sync()
 }
