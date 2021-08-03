@@ -3,6 +3,8 @@ package main
 import (
 	"expvar"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"runtime"
 	"time"
@@ -54,7 +56,7 @@ func run(log *zap.SugaredLogger) error {
 		conf.Version
 		Web struct {
 			APIHost         string        `conf:"default:0.0.0.0:3000"`
-			DebugHost       string        `conf:"default:0.0.0.0:4000"`
+			DebugHost       string        `conf:"default:0.0.0.0:4001"`
 			ReadTimeout     time.Duration `conf:"default:5s"`
 			WriteTimeout    time.Duration `conf:"default:10s"`
 			IdleTimeout     time.Duration `conf:"default:120s"`
@@ -102,6 +104,21 @@ func run(log *zap.SugaredLogger) error {
 		return errors.Wrap(err, "generating config for output")
 	}
 	log.Infow("startup", "config", out)
+
+	// =========================================================================
+	// Start Debug Service
+
+	log.Infow("startup", "status", "debug router started", "host", cfg.Web.DebugHost)
+
+	// Start the service listening for debug requests.
+	// Not concerned with shutting this down with load shedding.
+	go func() {
+		if err := http.ListenAndServe(cfg.Web.DebugHost, http.DefaultServeMux); err != nil {
+			log.Errorw("shutdown", "status", "debug router closed", "host", cfg.Web.DebugHost, "ERROR", err)
+		}
+	}()
+
+	select {}
 
 	return nil
 }
