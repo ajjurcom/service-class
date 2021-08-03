@@ -33,3 +33,6 @@ kind-down:
 
 kind-load:
 	kind load docker-image sales-api-amd64:$(VERSION) --name $(KIND_CLUSTER)
+
+kind-services:
+	kustomize build zarf/k8s/kind/sales-pod | kubectl apply -f -
