@@ -14,3 +14,13 @@ spec:
     metadata:
       labels:
         app: sales
+    spec:
+      containers:
+      # sales-api container configuration
+      - name: sales-api
+        resources:
+          limits:
+            cpu: "2000m" # Up to 2 full cores
+          requests:
+            cpu: "1000m" # Use 1 full cores
+
