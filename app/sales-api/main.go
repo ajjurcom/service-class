@@ -60,6 +60,9 @@ func run(log *zap.SugaredLogger) error {
 			IdleTimeout     time.Duration `conf:"default:120s"`
 			ShutdownTimeout time.Duration `conf:"default:20s"`
 		}
+		Keys struct {
+			API string `conf:"default:need-key,mask"`
+		}
 	}{
 		Version: conf.Version{
 			SVN:  build,
