@@ -27,3 +27,9 @@ kind-up:
 		--name $(KIND_CLUSTER) \
 		--config zarf/k8s/kind/kind-config.yaml
 	kubectl config set-context --current --namespace=sales-system
+
+kind-down:
+	kind delete cluster --name $(KIND_CLUSTER)
+
+kind-load:
+	kind load docker-image sales-api-amd64:$(VERSION) --name $(KIND_CLUSTER)
