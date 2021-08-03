@@ -57,3 +57,10 @@ kind-describe:
 	kubectl describe nodes
 	kubectl describe svc
 	kubectl describe pod -l app=sales
+
+# ==============================================================================
+# Modules support
+
+tidy:
+	go mod tidy
+	go mod vendor
