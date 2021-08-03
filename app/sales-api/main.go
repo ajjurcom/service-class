@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"fmt"
 	"os"
 	"runtime"
@@ -83,7 +84,21 @@ func run(log *zap.SugaredLogger) error {
 			fmt.Println(version)
 			return nil
 		}
+		return errors.Wrap(err, "parsing config")
 	}
+
+	// =========================================================================
+	// App Starting
+
+	expvar.NewString("build").Set(build)
+	log.Infow("starting service", "version", build)
+	defer log.Infow("shutdown complete")
+
+	out, err := conf.String(&cfg)
+	if err != nil {
+		return errors.Wrap(err, "generating config for output")
+	}
+	log.Infow("startup", "config", out)
 
 	return nil
 }
