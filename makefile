@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+# go install github.com/divan/expvarmon@latest
+# expvarmon -ports=":4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.Alloc"
+
 # $(shell git rev-parse --short HEAD)
 VERSION := 1.0
 
