@@ -7,7 +7,7 @@ sales-api:
 	docker build \
 		-f zarf/docker/dockerfile.sales-api \
 		-t sales-api-amd64:$(VERSION) \
-		--build-arg VCS_REF=$(VERSION)\
+		--build-arg VCS_REF=$(VERSION) \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 		.
 
@@ -36,6 +36,9 @@ kind-load:
 
 kind-services:
 	kustomize build zarf/k8s/kind/sales-pod | kubectl apply -f -
+
+kind-update: sales-api kind-load
+	kubectl rollout restart deployment sales-pod
 
 kind-logs:
 	kubectl logs -l app=sales --all-containers=true -f --tail=100
