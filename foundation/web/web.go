@@ -3,7 +3,6 @@ package web
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/dimfeld/httptreemux/v5"
@@ -48,8 +47,6 @@ func (a *App) Handle(method string, path string, handler Handler, mw ...Middlewa
 		if err := handler(r.Context(), w, r); err != nil {
 			return
 		}
-
-		fmt.Printf("{\"status\": %q, \"url\": %q}\n", "end", r.URL.String())
 
 		// INJECT HERE
 	}
