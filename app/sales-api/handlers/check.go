@@ -1,21 +1,22 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"os"
 )
 
-func readiness(w http.ResponseWriter, r *http.Request) {
+func readiness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	status := struct {
 		Status string
 	}{
 		Status: "OK",
 	}
-	json.NewEncoder(w).Encode(status)
+	return json.NewEncoder(w).Encode(status)
 }
 
-func liveness(w http.ResponseWriter, r *http.Request) {
+func liveness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	host, err := os.Hostname()
 	if err != nil {
 		host = "unavailable"
@@ -39,5 +40,5 @@ func liveness(w http.ResponseWriter, r *http.Request) {
 		Namespace: os.Getenv("KUBERNETES_NAMESPACE"),
 	}
 
-	json.NewEncoder(w).Encode(data)
+	return json.NewEncoder(w).Encode(data)
 }

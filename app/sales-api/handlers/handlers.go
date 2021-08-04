@@ -5,15 +5,15 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/dimfeld/httptreemux/v5"
+	"github.com/ardanlabs/service/foundation/web"
 )
 
 // APIMux constructs an http.Handler with all application routes defined.
-func APIMux() *httptreemux.ContextMux {
-	mux := httptreemux.NewContextMux()
+func APIMux() *web.App {
+	app := web.NewApp()
 
-	mux.Handle(http.MethodGet, "/debug/readiness", readiness)
-	mux.Handle(http.MethodGet, "/debug/liveness", liveness)
+	app.Handle(http.MethodGet, "/debug/readiness", readiness)
+	app.Handle(http.MethodGet, "/debug/liveness", liveness)
 
-	return mux
+	return app
 }
