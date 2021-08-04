@@ -11,11 +11,16 @@ import (
 )
 
 // APIMux constructs an http.Handler with all application routes defined.
-func APIMux(log *zap.SugaredLogger) *web.App {
+func APIMux(build string, log *zap.SugaredLogger) *web.App {
 	app := web.NewApp(mid.Logger(log))
 
-	app.Handle(http.MethodGet, "/debug/readiness", readiness)
-	app.Handle(http.MethodGet, "/debug/liveness", liveness)
+	// Register debug check endpoints.
+	cg := checkGroup{
+		build: build,
+		log:   log,
+	}
+	app.Handle(http.MethodGet, "/debug/readiness", cg.readiness)
+	app.Handle(http.MethodGet, "/debug/liveness", cg.liveness)
 
 	return app
 }

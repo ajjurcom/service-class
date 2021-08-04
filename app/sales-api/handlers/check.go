@@ -6,9 +6,15 @@ import (
 	"os"
 
 	"github.com/ardanlabs/service/foundation/web"
+	"go.uber.org/zap"
 )
 
-func readiness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+type checkGroup struct {
+	build string
+	log   *zap.SugaredLogger
+}
+
+func (cg checkGroup) readiness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	status := struct {
 		Status string
 	}{
@@ -17,7 +23,7 @@ func readiness(ctx context.Context, w http.ResponseWriter, r *http.Request) erro
 	return web.Respond(ctx, w, status, http.StatusOK)
 }
 
-func liveness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (cg checkGroup) liveness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	host, err := os.Hostname()
 	if err != nil {
 		host = "unavailable"
@@ -32,8 +38,8 @@ func liveness(ctx context.Context, w http.ResponseWriter, r *http.Request) error
 		Node      string `json:"node,omitempty"`
 		Namespace string `json:"namespace,omitempty"`
 	}{
-		Status: "up",
-		// Build:     cg.build,
+		Status:    "up",
+		Build:     cg.build,
 		Host:      host,
 		Pod:       os.Getenv("KUBERNETES_PODNAME"),
 		PodIP:     os.Getenv("KUBERNETES_NAMESPACE_POD_IP"),
