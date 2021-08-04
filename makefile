@@ -49,7 +49,7 @@ kind-update: sales-api kind-load
 	kubectl rollout restart deployment sales-pod
 
 kind-logs:
-	kubectl logs -l app=sales --all-containers=true -f --tail=100
+	kubectl logs -l app=sales --all-containers=true -f --tail=100 | jq
 
 kind-status-all:
 	kubectl get nodes -o wide
