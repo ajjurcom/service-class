@@ -140,7 +140,7 @@ func run(log *zap.SugaredLogger) error {
 	// Construct a server to service the requests against the mux.
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.APIMux(),
+		Handler:      handlers.APIMux(log),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 		IdleTimeout:  cfg.Web.IdleTimeout,

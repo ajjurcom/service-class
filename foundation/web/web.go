@@ -18,36 +18,40 @@ type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) e
 // data/logic on this App struct.
 type App struct {
 	*httptreemux.ContextMux
+	mw []Middleware
 }
 
 // NewApp creates an App value that handle a set of routes for the application.
-func NewApp() *App {
+func NewApp(mw ...Middleware) *App {
 	return &App{
 		ContextMux: httptreemux.NewContextMux(),
+		mw:         mw,
 	}
 }
 
 // Handle sets a handler function for a given HTTP method and path pair
 // to the application server mux.
-func (a *App) Handle(method string, path string, handler Handler) {
+func (a *App) Handle(method string, path string, handler Handler, mw ...Middleware) {
+
+	// First wrap handler specific middleware around this handler.
+	handler = wrapMiddleware(mw, handler)
+
+	// Add the application's general middleware to the handler chain.
+	handler = wrapMiddleware(a.mw, handler)
 
 	// Most Outer Layer
 	h := func(w http.ResponseWriter, r *http.Request) {
 
-		// CODE HERE
-		fmt.Printf("{\"status\": %q, \"url\": %q}\n", "started", r.URL.String())
+		// INJECT HERE
 
 		// Most Inner Layer
 		if err := handler(r.Context(), w, r); err != nil {
-
-			// NOT SURE WHAT TO DO - ERROR HANDLING
 			return
 		}
 
 		fmt.Printf("{\"status\": %q, \"url\": %q}\n", "end", r.URL.String())
 
-		// CODE HERE
-		// LOGGING HERE
+		// INJECT HERE
 	}
 
 	a.ContextMux.Handle(method, path, h)
