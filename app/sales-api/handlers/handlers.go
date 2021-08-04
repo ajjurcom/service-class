@@ -3,7 +3,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/dimfeld/httptreemux/v5"
@@ -13,16 +12,8 @@ import (
 func APIMux() *httptreemux.ContextMux {
 	mux := httptreemux.NewContextMux()
 
-	h := func(w http.ResponseWriter, r *http.Request) {
-		status := struct {
-			Status string
-		}{
-			Status: "OK",
-		}
-		json.NewEncoder(w).Encode(status)
-	}
-
-	mux.Handle(http.MethodGet, "/test", h)
+	mux.Handle(http.MethodGet, "/debug/readiness", readiness)
+	mux.Handle(http.MethodGet, "/debug/liveness", liveness)
 
 	return mux
 }
