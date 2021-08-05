@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/ardanlabs/service/business/sys/metrics"
 	"github.com/ardanlabs/service/foundation/web"
 	"github.com/pkg/errors"
 )
@@ -26,7 +27,8 @@ func Panics() web.Middleware {
 					// Stack trace will be provided.
 					err = errors.Errorf("PANIC: %v", rec)
 
-					// metrics.AddPanics(ctx)
+					// Updates the metrics stored in the context.
+					metrics.AddPanics(ctx)
 				}
 			}()
 

@@ -14,6 +14,7 @@ import (
 
 	"github.com/ardanlabs/conf"
 	"github.com/ardanlabs/service/app/sales-api/handlers"
+	"github.com/ardanlabs/service/business/sys/metrics"
 	"github.com/ardanlabs/service/foundation/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -137,10 +138,18 @@ func run(log *zap.SugaredLogger) error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
+	// Construct the mux for the API calls.
+	apiMux := handlers.APIMux(handlers.APIMuxConfig{
+		Build:    build,
+		Shutdown: shutdown,
+		Log:      log,
+		Metrics:  metrics.New(),
+	})
+
 	// Construct a server to service the requests against the mux.
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.APIMux(build, shutdown, log),
+		Handler:      apiMux,
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 		IdleTimeout:  cfg.Web.IdleTimeout,
