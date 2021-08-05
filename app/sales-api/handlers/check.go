@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/ardanlabs/service/business/sys/validate"
 	"github.com/ardanlabs/service/foundation/web"
 	"go.uber.org/zap"
 )
@@ -18,7 +19,7 @@ type checkGroup struct {
 
 func (cg checkGroup) testerror(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	if n := rand.Intn(100); n%2 == 0 {
-		return errors.New("something bad")
+		return validate.NewRequestError(errors.New("trusted"), http.StatusBadRequest)
 	}
 	status := struct {
 		Status string
