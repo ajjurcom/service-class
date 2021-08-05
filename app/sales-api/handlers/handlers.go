@@ -4,6 +4,7 @@ package handlers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/ardanlabs/service/business/web/mid"
 	"github.com/ardanlabs/service/foundation/web"
@@ -11,8 +12,8 @@ import (
 )
 
 // APIMux constructs an http.Handler with all application routes defined.
-func APIMux(build string, log *zap.SugaredLogger) *web.App {
-	app := web.NewApp(mid.Logger(log))
+func APIMux(build string, shutdown chan os.Signal, log *zap.SugaredLogger) *web.App {
+	app := web.NewApp(shutdown, mid.Logger(log))
 
 	// Register debug check endpoints.
 	cg := checkGroup{
@@ -21,6 +22,7 @@ func APIMux(build string, log *zap.SugaredLogger) *web.App {
 	}
 	app.Handle(http.MethodGet, "/debug/readiness", cg.readiness)
 	app.Handle(http.MethodGet, "/debug/liveness", cg.liveness)
+	app.Handle(http.MethodGet, "/testerror", cg.testerror)
 
 	return app
 }
