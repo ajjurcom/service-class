@@ -49,6 +49,9 @@ kind-update: sales-api kind-load
 	kubectl rollout restart deployment sales-pod
 
 kind-logs:
+	kubectl logs -l app=sales --all-containers=true -f --tail=100
+
+kind-logs-fmt:
 	kubectl logs -l app=sales --all-containers=true -f --tail=100 | jq
 
 kind-status-all:
