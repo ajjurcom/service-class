@@ -120,10 +120,16 @@ func run(log *zap.SugaredLogger) error {
 
 	log.Infow("startup", "status", "debug router started", "host", cfg.Web.DebugHost)
 
+	// The Debug function returns a mux to listen and serve on for all the debug
+	// related endpoints. This include the standard library endpoints.
+
+	// Construct the mux for the debug calls.
+	debugMux := handlers.DebugMux(build, log)
+
 	// Start the service listening for debug requests.
 	// Not concerned with shutting this down with load shedding.
 	go func() {
-		if err := http.ListenAndServe(cfg.Web.DebugHost, http.DefaultServeMux); err != nil {
+		if err := http.ListenAndServe(cfg.Web.DebugHost, debugMux); err != nil {
 			log.Errorw("shutdown", "status", "debug router closed", "host", cfg.Web.DebugHost, "ERROR", err)
 		}
 	}()

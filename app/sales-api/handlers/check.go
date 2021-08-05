@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"math/rand"
 	"net/http"
@@ -29,16 +30,22 @@ func (cg checkGroup) testerror(ctx context.Context, w http.ResponseWriter, r *ht
 	return web.Respond(ctx, w, status, http.StatusOK)
 }
 
-func (cg checkGroup) readiness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	status := struct {
+func (cg checkGroup) readiness(w http.ResponseWriter, r *http.Request) {
+	data := struct {
 		Status string
 	}{
 		Status: "OK",
 	}
-	return web.Respond(ctx, w, status, http.StatusOK)
+
+	statusCode := http.StatusOK
+	if err := response(w, statusCode, data); err != nil {
+		cg.log.Errorw("readiness", "ERROR", err)
+	}
+
+	cg.log.Infow("readiness", "statusCode", statusCode, "method", r.Method, "path", r.URL.Path, "remoteaddr", r.RemoteAddr)
 }
 
-func (cg checkGroup) liveness(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (cg checkGroup) liveness(w http.ResponseWriter, r *http.Request) {
 	host, err := os.Hostname()
 	if err != nil {
 		host = "unavailable"
@@ -62,5 +69,32 @@ func (cg checkGroup) liveness(ctx context.Context, w http.ResponseWriter, r *htt
 		Namespace: os.Getenv("KUBERNETES_NAMESPACE"),
 	}
 
-	return web.Respond(ctx, w, data, http.StatusOK)
+	statusCode := http.StatusOK
+	if err := response(w, statusCode, data); err != nil {
+		cg.log.Errorw("liveness", "ERROR", err)
+	}
+
+	cg.log.Infow("liveness", "statusCode", statusCode, "method", r.Method, "path", r.URL.Path, "remoteaddr", r.RemoteAddr)
+}
+
+func response(w http.ResponseWriter, statusCode int, data interface{}) error {
+
+	// Convert the response value to JSON.
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	// Set the content type and headers once we know marshaling has succeeded.
+	w.Header().Set("Content-Type", "application/json")
+
+	// Write the status code to the response.
+	w.WriteHeader(statusCode)
+
+	// Send the result back to the client.
+	if _, err := w.Write(jsonData); err != nil {
+		return err
+	}
+
+	return nil
 }
