@@ -13,7 +13,7 @@ import (
 
 // APIMux constructs an http.Handler with all application routes defined.
 func APIMux(build string, shutdown chan os.Signal, log *zap.SugaredLogger) *web.App {
-	app := web.NewApp(shutdown, mid.Logger(log))
+	app := web.NewApp(shutdown, mid.Logger(log), mid.Errors(log))
 
 	// Register debug check endpoints.
 	cg := checkGroup{

@@ -23,7 +23,7 @@ func Logger(log *zap.SugaredLogger) web.Middleware {
 			// to be shutdown gracefully.
 			v, ok := ctx.Value(web.KeyValues).(*web.Values)
 			if !ok {
-				return nil // web.NewShutdownError("web value missing from context")
+				return web.NewShutdownError("web value missing from context")
 			}
 
 			log.Infow("request started", "traceid", v.TraceID, "method", r.Method, "path", r.URL.Path,
