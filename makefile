@@ -51,10 +51,10 @@ kind-update: sales-api kind-load
 	kubectl rollout restart deployment sales-pod
 
 kind-logs:
-	kubectl logs -l app=sales --all-containers=true -f --tail=100
+	kubectl logs -l app=sales --all-containers=true -f --tail=100 | go run app/logfmt/main.go
 
-kind-logs-fmt:
-	kubectl logs -l app=sales --all-containers=true -f --tail=100 | jq
+kind-logs-sales:
+	kubectl logs -l app=sales --all-containers=true -f --tail=100 | go run app/logfmt/main.go -service=SALES-API
 
 kind-status-all:
 	kubectl get nodes -o wide
