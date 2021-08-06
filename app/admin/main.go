@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -10,18 +11,46 @@ import (
 	"os"
 	"time"
 
+	"github.com/ardanlabs/service/business/data/schema"
+	"github.com/ardanlabs/service/foundation/database"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 )
 
 func main() {
 	// err := genKey()
-	err := genToken()
+	//err := genToken()
+	err := migrate()
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func migrate() error {
+	db, err := database.Open(database.Config{
+		User:         "postgres",
+		Password:     "postgres",
+		Host:         "0.0.0.0",
+		Name:         "postgres",
+		MaxIdleConns: 0,
+		MaxOpenConns: 0,
+		DisableTLS:   true,
+	})
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := schema.Migrate(ctx, db); err != nil {
+		return errors.Wrap(err, "migrate database")
+	}
+
+	fmt.Println("migrations complete")
+	return nil
 }
 
 func genToken() error {
