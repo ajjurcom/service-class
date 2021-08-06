@@ -48,8 +48,13 @@ func migrate() error {
 	if err := schema.Migrate(ctx, db); err != nil {
 		return errors.Wrap(err, "migrate database")
 	}
-
 	fmt.Println("migrations complete")
+
+	if err := schema.Seed(ctx, db); err != nil {
+		return errors.Wrap(err, "seed database")
+	}
+	fmt.Println("seed data complete")
+
 	return nil
 }
 
