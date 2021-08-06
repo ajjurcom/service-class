@@ -1,9 +1,17 @@
 SHELL := /bin/bash
 
 # curl -il http://localhost:3000/testerror
-
+#
 # go install github.com/divan/expvarmon@latest
 # expvarmon -ports=":4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.Alloc"
+#
+# To generate a private/public key PEM file.
+# openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
+# openssl rsa -pubout -in private.pem -out public.pem
+# ./sales-admin genkey
+
+run-admin:
+	go run app/admin/main.go
 
 run-local:
 	go run app/sales-api/main.go | jq
