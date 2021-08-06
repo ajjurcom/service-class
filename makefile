@@ -83,6 +83,9 @@ kind-describe:
 	kubectl describe svc
 	kubectl describe pod -l app=sales
 
+kind-status-db:
+	kubectl get pods -o wide --watch --namespace=sales-system
+
 # ==============================================================================
 # Modules support
 
