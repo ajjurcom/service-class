@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/pkg/errors"
 )
 
@@ -63,8 +63,8 @@ func genToken() error {
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "service project",
 			Subject:   "123456789",
-			ExpiresAt: time.Now().Add(8760 * time.Hour).Unix(),
-			IssuedAt:  time.Now().UTC().Unix(),
+			ExpiresAt: jwt.At(time.Now().Add(8760 * time.Hour)),
+			IssuedAt:  jwt.Now(),
 		},
 		Roles: []string{"ADMIN"},
 	}
@@ -73,14 +73,16 @@ func genToken() error {
 	token := jwt.NewWithClaims(method, claims)
 	token.Header["kid"] = "12312-5325423-87454"
 
-	str, err := token.SignedString(privateKey)
+	tokenStr, err := token.SignedString(privateKey)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("-----  BEGIN TOKEN -----")
-	fmt.Println(str)
+	fmt.Println(tokenStr)
 	fmt.Println("-----  END TOKEN -----")
+
+	// =========================================================================
 
 	// Marshal the public key from the private key to PKIX.
 	asn1Bytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
@@ -98,6 +100,32 @@ func genToken() error {
 	if err := pem.Encode(os.Stdout, &publicBlock); err != nil {
 		return errors.Wrap(err, "encoding to public file")
 	}
+
+	// =========================================================================
+
+	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		return &privateKey.PublicKey, nil
+	}
+
+	// Create the token parser to use. The algorithm used to sign the JWT must be
+	// validated to avoid a critical vulnerability:
+	// https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/
+	parser := jwt.NewParser(jwt.WithValidMethods([]string{"RS256"}), jwt.WithAudience("student"))
+
+	var parseClaims struct {
+		jwt.StandardClaims
+		Roles []string
+	}
+	t, err := parser.ParseWithClaims(tokenStr, &parseClaims, keyFunc)
+	if err != nil {
+		return err
+	}
+
+	if !t.Valid {
+		return errors.New("invalid token")
+	}
+	fmt.Println("TOKEN VALIDATED!!!")
+	fmt.Printf("%#v\n", parseClaims)
 
 	return nil
 }
