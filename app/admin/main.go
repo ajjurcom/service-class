@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dgrijalva/jwt-go/v4"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 )
 
@@ -63,8 +63,8 @@ func genToken() error {
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "service project",
 			Subject:   "123456789",
-			ExpiresAt: jwt.At(time.Now().Add(8760 * time.Hour)),
-			IssuedAt:  jwt.Now(),
+			ExpiresAt: time.Now().Add(8760 * time.Hour).Unix(),
+			IssuedAt:  time.Now().UTC().Unix(),
 		},
 		Roles: []string{"ADMIN"},
 	}
@@ -107,10 +107,7 @@ func genToken() error {
 		return &privateKey.PublicKey, nil
 	}
 
-	// Create the token parser to use. The algorithm used to sign the JWT must be
-	// validated to avoid a critical vulnerability:
-	// https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/
-	parser := jwt.NewParser(jwt.WithValidMethods([]string{"RS256"}), jwt.WithAudience("student"))
+	var parser jwt.Parser
 
 	var parseClaims struct {
 		jwt.StandardClaims
