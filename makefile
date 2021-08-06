@@ -1,6 +1,8 @@
 SHELL := /bin/bash
 
 # curl -il http://localhost:3000/testerror
+# curl -il -H "Authorization: Bearer ${TOKEN}" http://localhost:3000/testauth
+# eyJhbGciOiJSUzI1NiIsImtpZCI6IjEyMzEyLTUzMjU0MjMtODc0NTQiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NTk4MDE3NTAsImlhdCI6MTYyODI2NTc1MCwiaXNzIjoic2VydmljZSBwcm9qZWN0Iiwic3ViIjoiMTIzNDU2Nzg5IiwiUm9sZXMiOlsiQURNSU4iXX0.lj88uCMM7Etp1Ldfje1lWdBb-9wLWRqmS2RZyYpnl-JzdjAKEaq9oXKzJHBxEVzGFiMjhNuDPSXrsruVrIDuAosnlnaZ8-qQaTkxj3IZ2YqNuqdseVk7kUJ2Jr0R1rpl1a2naK79hZlqKusq_5StN5dIS__rYy8OMD3IzvWazOsYcLFcxD1E3d1jmOJe02k7B1mrEac09_Y461P4jxPdoP4BjzAmK1G9kyFoaDt_eDljsXzhY8s5_mKYgXZavpGRCvSvec7Zq1ylGTAT_zcoke81d5p1601m2qYCIwmNczhEMQ8-FqgKtCZaGzukuaEgl4sTK3KZhGFTLKmeFXYm6w
 #
 # go install github.com/divan/expvarmon@latest
 # expvarmon -ports=":4000" -vars="build,requests,goroutines,errors,panics,mem:memstats.Alloc"
