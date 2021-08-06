@@ -107,7 +107,9 @@ func genToken() error {
 		return &privateKey.PublicKey, nil
 	}
 
-	var parser jwt.Parser
+	parser := jwt.Parser{
+		ValidMethods: []string{"RS256"},
+	}
 
 	var parseClaims struct {
 		jwt.StandardClaims
