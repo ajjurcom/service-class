@@ -16,6 +16,9 @@ github.com/go-playground/universal-translator
 ## explicit
 github.com/go-playground/validator/v10
 github.com/go-playground/validator/v10/translations/en
+# github.com/golang-jwt/jwt/v4 v4.0.0
+## explicit
+github.com/golang-jwt/jwt/v4
 # github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
