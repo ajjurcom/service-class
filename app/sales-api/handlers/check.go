@@ -7,15 +7,19 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/ardanlabs/service/business/sys/validate"
+	"github.com/ardanlabs/service/foundation/database"
 	"github.com/ardanlabs/service/foundation/web"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
 type checkGroup struct {
 	build string
 	log   *zap.SugaredLogger
+	db    *sqlx.DB
 }
 
 func (cg checkGroup) testerror(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -31,18 +35,28 @@ func (cg checkGroup) testerror(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 func (cg checkGroup) readiness(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Status string
-	}{
-		Status: "OK",
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second)
+	defer cancel()
+
+	status := "ok"
+	statusCode := http.StatusOK
+	if err := database.StatusCheck(ctx, cg.db); err != nil {
+		status = "db not ready"
+		statusCode = http.StatusInternalServerError
 	}
 
-	statusCode := http.StatusOK
+	data := struct {
+		Status string `json:"status"`
+	}{
+		Status: status,
+	}
+
 	if err := response(w, statusCode, data); err != nil {
 		cg.log.Errorw("readiness", "ERROR", err)
 	}
 
 	cg.log.Infow("readiness", "statusCode", statusCode, "method", r.Method, "path", r.URL.Path, "remoteaddr", r.RemoteAddr)
+
 }
 
 func (cg checkGroup) liveness(w http.ResponseWriter, r *http.Request) {
