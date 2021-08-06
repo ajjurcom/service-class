@@ -14,7 +14,9 @@ import (
 
 	"github.com/ardanlabs/conf"
 	"github.com/ardanlabs/service/app/sales-api/handlers"
+	"github.com/ardanlabs/service/business/sys/auth"
 	"github.com/ardanlabs/service/business/sys/metrics"
+	"github.com/ardanlabs/service/foundation/keystore"
 	"github.com/ardanlabs/service/foundation/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -72,8 +74,9 @@ func run(log *zap.SugaredLogger) error {
 			IdleTimeout     time.Duration `conf:"default:120s"`
 			ShutdownTimeout time.Duration `conf:"default:20s"`
 		}
-		Keys struct {
-			API string `conf:"default:need-key,mask"`
+		Auth struct {
+			KeysFolder string `conf:"default:zarf/keys/"`
+			Algorithm  string `conf:"default:RS256"`
 		}
 	}{
 		Version: conf.Version{
@@ -116,6 +119,23 @@ func run(log *zap.SugaredLogger) error {
 	log.Infow("startup", "config", out)
 
 	// =========================================================================
+	// Initialize authentication support
+
+	log.Infow("startup", "status", "initializing authentication support")
+
+	// Construct a key store based on the key files stored in
+	// the specified directory.
+	ks, err := keystore.NewFS(os.DirFS(cfg.Auth.KeysFolder))
+	if err != nil {
+		return errors.Wrap(err, "reading keys")
+	}
+
+	auth, err := auth.New(cfg.Auth.Algorithm, ks)
+	if err != nil {
+		return errors.Wrap(err, "constructing auth")
+	}
+
+	// =========================================================================
 	// Start Debug Service
 
 	log.Infow("startup", "status", "debug router started", "host", cfg.Web.DebugHost)
@@ -150,6 +170,7 @@ func run(log *zap.SugaredLogger) error {
 		Shutdown: shutdown,
 		Log:      log,
 		Metrics:  metrics.New(),
+		Auth:     auth,
 	})
 
 	// Construct a server to service the requests against the mux.

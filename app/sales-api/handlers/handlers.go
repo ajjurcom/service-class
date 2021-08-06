@@ -8,6 +8,7 @@ import (
 	"net/http/pprof"
 	"os"
 
+	"github.com/ardanlabs/service/business/sys/auth"
 	"github.com/ardanlabs/service/business/sys/metrics"
 	"github.com/ardanlabs/service/business/web/mid"
 	"github.com/ardanlabs/service/foundation/web"
@@ -56,6 +57,7 @@ type APIMuxConfig struct {
 	Shutdown chan os.Signal
 	Log      *zap.SugaredLogger
 	Metrics  *metrics.Metrics
+	Auth     *auth.Auth
 }
 
 // APIMux constructs an http.Handler with all application routes defined.
@@ -74,6 +76,7 @@ func APIMux(cfg APIMuxConfig) *web.App {
 		log:   cfg.Log,
 	}
 	app.Handle(http.MethodGet, "/testerror", cg.testerror)
+	app.Handle(http.MethodGet, "/testauth", cg.testerror, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
 
 	return app
 }
