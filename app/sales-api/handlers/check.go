@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/ardanlabs/service/business/sys/database"
 	"github.com/ardanlabs/service/business/sys/validate"
-	"github.com/ardanlabs/service/foundation/database"
 	"github.com/ardanlabs/service/foundation/web"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
