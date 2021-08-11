@@ -8,6 +8,7 @@ import (
 	"net/http/pprof"
 	"os"
 
+	"github.com/ardanlabs/service/business/data/user"
 	"github.com/ardanlabs/service/business/sys/auth"
 	"github.com/ardanlabs/service/business/sys/metrics"
 	"github.com/ardanlabs/service/business/web/mid"
@@ -80,6 +81,18 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	}
 	app.Handle(http.MethodGet, "/testerror", cg.testerror)
 	app.Handle(http.MethodGet, "/testauth", cg.testerror, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+
+	// Register user management and authentication endpoints.
+	ug := userGroup{
+		store: user.NewStore(cfg.Log, cfg.DB),
+		auth:  cfg.Auth,
+	}
+	app.Handle(http.MethodGet, "/v1/users/:page/:rows", ug.query, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	app.Handle(http.MethodGet, "/v1/users/token/:kid", ug.token)
+	app.Handle(http.MethodGet, "/v1/users/:id", ug.queryByID, mid.Authenticate(cfg.Auth))
+	app.Handle(http.MethodPost, "/v1/users", ug.create, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	app.Handle(http.MethodPut, "/v1/users/:id", ug.update, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
+	app.Handle(http.MethodDelete, "/v1/users/:id", ug.delete, mid.Authenticate(cfg.Auth), mid.Authorize(auth.RoleAdmin))
 
 	return app
 }

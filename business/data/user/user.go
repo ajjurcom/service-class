@@ -22,8 +22,8 @@ type Store struct {
 }
 
 // NewStore constructs a user store for api access.
-func NewStore(log *zap.SugaredLogger, db *sqlx.DB) Store {
-	return Store{
+func NewStore(log *zap.SugaredLogger, db *sqlx.DB) *Store {
+	return &Store{
 		log: log,
 		db:  db,
 	}
