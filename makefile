@@ -91,7 +91,11 @@ kind-status-db:
 	kubectl get pods -o wide --watch --namespace=sales-system
 
 # ==============================================================================
-# Modules support
+# Modules/Test support
+
+test:
+	go test ./... -count=1
+	staticcheck -checks=all ./...
 
 tidy:
 	go mod tidy
